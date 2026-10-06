@@ -1,7 +1,9 @@
 # DLANVS
 
+import uuid
 import threading
 from typing import Any, Optional
+from cryptography import x509
 from cls.store_db import Database
 from cls.crypto_manager import CryptoManager
 import dlanvs_cfg as cfg
@@ -105,13 +107,13 @@ class VotingEngine:
         if abs(fn.utc_ts() - float(event["timestamp"])) > 24 * 3600:
             return False, "timestamp outside allowed window"
         try:
-            cert = x509.load_der_x509_certificate(b64d(event["certificate"]))
+            cert = x509.load_der_x509_certificate(fn.b64d(event["certificate"]))
         except Exception:
             return False, "invalid certificate"
         pid = fn.participant_id_from_cert(cert)
         if pid != event["sender_id"]:
             return False, "sender id does not match certificate"
-        if not valid_certificate(cert, self.crypto.ca):
+        if not fn.valid_certificate(cert, self.crypto.ca):
             return False, "untrusted certificate"
         if not self.crypto.verify_event_signature(cert, event):
             return False, "invalid signature"
