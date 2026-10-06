@@ -1,9 +1,11 @@
 # DLANVS
 
+import json
 import socket
 import queue
 import threading
 from typing import Any, Optional
+from cryptography import x509
 from cls.crypto_manager import CryptoManager
 from cls.voting_engine import VotingEngine
 import dlanvs_fn as fn
@@ -128,7 +130,7 @@ class Network:
                 "signature": w["signature"],
             }
             cert = x509.load_der_x509_certificate(fn.b64d(event["certificate"]))
-            if participant_id_from_cert(cert) != event["sender_id"]:
+            if fn.participant_id_from_cert(cert) != event["sender_id"]:
                 return None
             aad = fn.canonical(event)
             plaintext = self.crypto.decrypt(
