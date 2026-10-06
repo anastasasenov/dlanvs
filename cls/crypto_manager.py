@@ -58,7 +58,7 @@ class CryptoManager:
         sig = fn.b64d(event["signature"])
         unsigned = dict(event)
         unsigned.pop("signature", None)
-        return verify(cert, sig, fn.canonical(unsigned))
+        return fn.verify(cert, sig, fn.canonical(unsigned))
 
 
 @dataclasses.dataclass
