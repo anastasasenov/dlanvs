@@ -108,7 +108,7 @@ class VotingEngine:
             cert = x509.load_der_x509_certificate(b64d(event["certificate"]))
         except Exception:
             return False, "invalid certificate"
-        pid = participant_id_from_cert(cert)
+        pid = fn.participant_id_from_cert(cert)
         if pid != event["sender_id"]:
             return False, "sender id does not match certificate"
         if not valid_certificate(cert, self.crypto.ca):
