@@ -76,7 +76,7 @@ class Network:
         try:
             self.outgoing.put_nowait(event)
         except queue.Full:
-            print("WARNING: outgoing queue full; packet dropped")
+            logging.warning("WARNING: outgoing queue full; packet dropped")            
 
     def _pack(self, event: dict[str, Any]) -> bytes:
         # Encrypt the payload, while keeping routing metadata visible.
@@ -108,7 +108,7 @@ class Network:
         }
         raw = fn.canonical(wrapper)
         if len(raw) > self.args.max_packet:
-            raise ValueError(
+            logging.error(
                 f"packet too large ({len(raw)} > {self.args.max_packet}); "
                 "reduce topic description/options or increase max packet carefully"
             )
@@ -140,7 +140,8 @@ class Network:
             )
             event["payload"] = json.loads(plaintext.decode("utf-8"))
             return event
-        except Exception:
+        except Exception as exc:
+            logging.error("_unpack : " + str(exc))
             return None
 
     def _sender(self):
@@ -156,7 +157,7 @@ class Network:
                     if self.sock:
                         self.sock.sendto(raw, self.destination)
             except Exception as exc:
-                print(f"Network send error: {exc}")
+                logging.error(f"_sender: Network send error: {exc}")
 
     def _receiver(self):
         while not self.stop_event.is_set():
@@ -165,6 +166,7 @@ class Network:
             except socket.timeout:
                 continue
             except OSError:
+                logging.error(f"_receiver: OSError")
                 break
             event = self._unpack(data)
             if not event:
@@ -247,4 +249,4 @@ class Network:
                 if self.sock:
                     self.sock.sendto(raw, self.destination)
         except Exception as exc:
-            print(f"Control send error: {exc}")
+            logging.error(f"Control send error: {exc}")
