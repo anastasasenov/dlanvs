@@ -2,6 +2,7 @@
 
 import secrets
 import dataclasses
+import logging
 from typing import Any, Optional
 from pathlib import Path
 from cryptography import x509
@@ -36,6 +37,7 @@ class CryptoManager:
             if len(raw) != 32:
                 raise ValueError("Group key must be exactly 32 bytes")
             self.group_key = raw
+            logging.info(group_key_path + " group_key: " + str(self.group_key))
         else:
             raise ValueError("A group key file is required")
 
