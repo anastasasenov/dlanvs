@@ -58,6 +58,9 @@ def build_parser():
     p.add_argument("--offline-timeout", type=float, default=DEFAULT_OFFLINE_TIMEOUT)
     p.add_argument("--digest-interval", type=float, default=DEFAULT_DIGEST_INTERVAL)
     p.add_argument("--max-packet", type=int, default=DEFAULT_MAX_PACKET)
+    p.add_argument("--log-file", help="Path to the log file")
+    p.add_argument("--log-level", default="ERROR", help="Log level (INFO, DEBUG, WARNING, ERROR)")
+
     return p
 
 
