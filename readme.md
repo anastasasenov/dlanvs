@@ -9,7 +9,7 @@ This is an experimenta voting system written in Python. The system operates enti
 
 ### Prerequisites
 
-$ pip install cryptography sqlite3
+$ pip install cryptography 
 
 ### Command Line Arguments
 
