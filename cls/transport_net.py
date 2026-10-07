@@ -138,6 +138,7 @@ class Network:
             plaintext = self.crypto.decrypt(
                 fn.b64d(w["nonce"]), fn.b64d(w["ciphertext"]), aad
             )
+            logging.debug("_unpack: decrypted plaintext: "+str(plaintext))
             event["payload"] = json.loads(plaintext.decode("utf-8"))
             return event
         except Exception as exc:
