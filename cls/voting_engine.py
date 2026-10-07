@@ -1,6 +1,7 @@
 # DLANVS
 
 import uuid
+import math
 import threading
 from typing import Any, Optional
 from cryptography import x509
@@ -188,9 +189,9 @@ class VotingEngine:
             visibility = float(p["visibility_deadline"])
             if deadline <= now or visibility < deadline:
                 return False, "invalid topic deadlines"
-            if deadline - now > MAX_TOPIC_LIFETIME:
+            if deadline - now > cfg.MAX_TOPIC_LIFETIME:
                 return False, "topic lifetime too long"
-            if visibility - deadline > MAX_VISIBILITY:
+            if visibility - deadline > cfg.MAX_VISIBILITY:
                 return False, "visibility lifetime too long"
             options = p["options"]
             if not isinstance(options, list) or not 2 <= len(options) <= 32:
