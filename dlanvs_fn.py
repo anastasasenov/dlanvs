@@ -360,7 +360,24 @@ def run_gui(engine: VotingEngine, network: Network):
     info = tk.Text(info_frame, wrap="word")
     info.pack(fill="both", expand=True)
 
+    def get_selected_pos():
+        nRet = -1
+        ids = tree.selection()
+        if len( ids ) == 1:
+            all_ids = tree.get_children()
+            for i in range(0, len(all_ids)):
+                if ids[0] == all_ids[i]:
+                    nRet = i
+                    break
+        return nRet
+
+    def set_selected_pos(nPos):
+        all_ids = tree.get_children()
+        if nPos < len(all_ids) and nPos >= 0:
+            tree.selection_set(all_ids[nPos])
+
     def refresh():
+        sel_pos = get_selected_pos()
         engine.refresh_participant_status()
         for item in tree.get_children():
             tree.delete(item)
@@ -388,6 +405,8 @@ def run_gui(engine: VotingEngine, network: Network):
         info.insert("end", f"Topics: {len(engine.topics)}\n")
         info.insert("end", f"Participants: {len(engine.participants)}\n")
         status_var.set(f"Running | {len(engine.participants)} participants")
+
+        set_selected_pos( sel_pos )
 
         root.after(2000, refresh)
 
