@@ -30,6 +30,7 @@ from cls.voting_engine import VotingEngine
 from cls.store_db import Database
 from cls.crypto_manager import CryptoManager
 from cls.transport_net import Network
+import dlanvs_cfg as cfg
 
 
 def utc_now() -> dt.datetime:
@@ -230,4 +231,170 @@ def ensure_group_key(path: str):
         print(f"Created group key: {path}")
 
 def run_gui(engine: VotingEngine, network: Network):
-    print("TODO")
+    import tkinter as tk
+    from tkinter import ttk, messagebox, simpledialog
+
+    root = tk.Tk()
+    root.title(f"{cfg.APP_NAME} - {engine.crypto.display_name}")
+    root.geometry("1000x700")
+
+    style = ttk.Style(root)
+    try:
+        style.theme_use("clam")
+    except Exception:
+        pass
+
+    top = ttk.Frame(root, padding=8)
+    top.pack(fill="x")
+
+    ttk.Label(
+        top,
+        text=f"Participant: {engine.crypto.display_name} | "
+             f"ID: {engine.crypto.participant_id[:16]}",
+    ).pack(side="left")
+    status_var = tk.StringVar(value="Running")
+    ttk.Label(top, textvariable=status_var).pack(side="right")
+
+    notebook = ttk.Notebook(root)
+    notebook.pack(fill="both", expand=True, padx=8, pady=8)
+
+    topics_frame = ttk.Frame(notebook, padding=8)
+    participants_frame = ttk.Frame(notebook, padding=8)
+    info_frame = ttk.Frame(notebook, padding=8)
+    notebook.add(topics_frame, text="Topics")
+    notebook.add(participants_frame, text="Participants")
+    notebook.add(info_frame, text="Status")
+
+    columns = ("id", "status", "title", "votes", "quorum", "deadline")
+    tree = ttk.Treeview(topics_frame, columns=columns, show="headings", height=20)
+    for c, width in [
+        ("id", 150), ("status", 100), ("title", 250),
+        ("votes", 80), ("quorum", 100), ("deadline", 200)
+    ]:
+        tree.heading(c, text=c.title())
+        tree.column(c, width=width)
+    tree.pack(fill="both", expand=True)
+
+    buttons = ttk.Frame(topics_frame)
+    buttons.pack(fill="x", pady=8)
+
+    def create_topic():
+        title = simpledialog.askstring("Create topic", "Title:", parent=root)
+        if not title:
+            return
+        dur = simpledialog.askinteger(
+            "Create topic", "Voting duration (seconds):",
+            parent=root, initialvalue=300, minvalue=10, maxvalue=cfg.MAX_TOPIC_LIFETIME
+        )
+        if dur is None:
+            return
+        vis = simpledialog.askinteger(
+            "Create topic", "Visibility after deadline (seconds):",
+            parent=root, initialvalue=600, minvalue=0, maxvalue=cfg.MAX_VISIBILITY
+        )
+        if vis is None:
+            return
+        quorum = simpledialog.askfloat(
+            "Create topic", "Quorum percentage:",
+            parent=root, initialvalue=50.0, minvalue=0.1, maxvalue=100.0
+        )
+        if quorum is None:
+            return
+        opts = simpledialog.askstring(
+            "Create topic", "Options, comma separated:",
+            parent=root, initialvalue="YES,NO"
+        )
+        if not opts:
+            return
+        options = [x.strip() for x in opts.split(",") if x.strip()]
+        try:
+            e = engine.create_topic(title, "", dur, vis, quorum, options)
+            network.send_event(e)
+            refresh()
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+
+    def selected_topic():
+        sel = tree.selection()
+        if not sel:
+            messagebox.showinfo("Vote", "Select a topic first.")
+            return None
+        return tree.item(sel[0], "values")[0]
+
+    def vote():
+        tid = selected_topic()
+        if not tid:
+            return
+        topic = engine.topics[tid]
+        option = simpledialog.askstring(
+            "Vote", f"Options: {', '.join(topic['options'])}\nEnter option:",
+            parent=root
+        )
+        if not option:
+            return
+        try:
+            e = engine.cast_vote(tid, option.strip())
+            network.send_event(e)
+            refresh()
+        except Exception as exc:
+            messagebox.showerror("Vote rejected", str(exc))
+
+    def result():
+        tid = selected_topic()
+        if not tid:
+            return
+        r = engine.result(tid)
+        messagebox.showinfo("Result", json.dumps(r, indent=2))
+
+    ttk.Button(buttons, text="Create Topic", command=create_topic).pack(side="left", padx=4)
+    ttk.Button(buttons, text="Vote", command=vote).pack(side="left", padx=4)
+    ttk.Button(buttons, text="Result", command=result).pack(side="left", padx=4)
+
+    pcols = ("name", "id", "status", "last")
+    ptree = ttk.Treeview(participants_frame, columns=pcols, show="headings")
+    for c, width in [("name", 220), ("id", 260), ("status", 120), ("last", 250)]:
+        ptree.heading(c, text=c.title())
+        ptree.column(c, width=width)
+    ptree.pack(fill="both", expand=True)
+
+    info = tk.Text(info_frame, wrap="word")
+    info.pack(fill="both", expand=True)
+
+    def refresh():
+        engine.refresh_participant_status()
+        for item in tree.get_children():
+            tree.delete(item)
+        for t in sorted(engine.topics.values(), key=lambda x: x["topic_id"]):
+            r = engine.result(t["topic_id"])
+            tree.insert("", "end", values=(
+                t["topic_id"], engine.topic_status(t), t["title"],
+                f"{r['votes']}/{r['eligible']}",
+                f"{r['votes']}/{r['quorum_required']}",
+                iso(t["voting_deadline"]),
+            ))
+
+        for item in ptree.get_children():
+            ptree.delete(item)
+        for p in sorted(engine.participants.values(), key=lambda x: x.name):
+            ptree.insert("", "end", values=(
+                p.name, p.participant_id[:32], p.status, iso(p.last_seen)
+            ))
+
+        info.delete("1.0", "end")
+        info.insert("end", f"Participant: {engine.crypto.display_name}\n")
+        info.insert("end", f"ID: {engine.crypto.participant_id}\n")
+        info.insert("end", f"Events: {engine.db.event_count()}\n")
+        info.insert("end", f"State hash: {engine.state_hash()}\n")
+        info.insert("end", f"Topics: {len(engine.topics)}\n")
+        info.insert("end", f"Participants: {len(engine.participants)}\n")
+        status_var.set(f"Running | {len(engine.participants)} participants")
+
+        root.after(2000, refresh)
+
+    def on_close():
+        network.stop()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_close)
+    refresh()
+    root.mainloop()
