@@ -4,6 +4,7 @@ import json
 import socket
 import queue
 import struct
+import logging
 import threading
 from typing import Any, Optional
 from cryptography import x509
@@ -146,6 +147,7 @@ class Network:
         while not self.stop_event.is_set():
             try:
                 event = self.outgoing.get(timeout=0.5)
+                logging.debug(f"[SEND] event: {str(event)}")
             except queue.Empty:
                 continue
             try:
@@ -179,9 +181,9 @@ class Network:
                     p = self.engine.participants.get(event["sender_id"])
                     if p:
                         self.engine.db.upsert_participant(p)
-                print(
-                    f"\n[RECV] {event['event_type']} "
+                logging.debug(f"[RECV] {event['event_type']} "
                     f"{event['event_id'][:8]} from {event['sender_id'][:8]}"
+                    f" event: {str(event)}"
                 )
             elif reason not in ("duplicate event",):
                 # Invalid packets are deliberately not printed verbosely.
