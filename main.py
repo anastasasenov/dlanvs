@@ -19,6 +19,7 @@ def main():
 
     parser = cfg.build_parser()
     args = parser.parse_args()
+    fn.setupLogging(args.log_file, args.log_level)
 
     if args.command == cfg.CMD_INIT_CA:
         fn.generate_ca(args.cert if hasattr(args, "cert") else "ca.crt",
