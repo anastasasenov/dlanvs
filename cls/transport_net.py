@@ -3,6 +3,7 @@
 import json
 import socket
 import queue
+import struct
 import threading
 from typing import Any, Optional
 from cryptography import x509
