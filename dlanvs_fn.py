@@ -232,8 +232,9 @@ def ensure_group_key(path: str):
         print(f"Created group key: {path}")
 
 def setupLogging(
-    log_file: str = None,
-    log_level: str = "INFO"):
+    log_file: str,
+    log_level: str,
+    str_args: str):
 
     h = logging.StreamHandler()
     if log_file:
@@ -244,7 +245,7 @@ def setupLogging(
     h.setFormatter(formatter)
     if not logger.handlers:
         logger.addHandler(h)
-    logging.info(cfg.APP_NAME + " starting ...")
+    logging.info(cfg.APP_NAME + " : " + str_args)
 
 def run_gui(engine: VotingEngine, network: Network):
     import tkinter as tk
