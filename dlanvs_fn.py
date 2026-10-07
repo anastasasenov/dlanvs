@@ -20,6 +20,7 @@ import sys
 import threading
 import time
 import uuid
+import logging
 from pathlib import Path
 from typing import Any, Optional
 from cryptography import x509
@@ -229,6 +230,21 @@ def ensure_group_key(path: str):
         except Exception:
             pass
         print(f"Created group key: {path}")
+
+def setupLogging(
+    log_file: str = None,
+    log_level: str = "INFO"):
+
+    h = logging.StreamHandler()
+    if log_file:
+        h = logging.FileHandler(log_file)
+    formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%H:%M:%S')
+    logger = logging.getLogger()
+    logger.setLevel(getattr(logging, log_level.upper(), logging.INFO))
+    h.setFormatter(formatter)
+    if not logger.handlers:
+        logger.addHandler(h)
+    logging.info(cfg.APP_NAME + " starting ...")
 
 def run_gui(engine: VotingEngine, network: Network):
     import tkinter as tk
