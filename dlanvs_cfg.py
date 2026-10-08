@@ -19,6 +19,7 @@ MAX_SNAPSHOT_BYTES = 2_000_000
 MAX_TOPIC_LIFETIME = 7 * 24 * 3600
 MAX_VISIBILITY = 30 * 24 * 3600
 ALLOWED_VOTES = {"YES", "NO", "ABSTAIN"}
+UNTRUSTED = False
 
 CMD_INIT_CA = "init-ca"
 CMD_INIT_NODE = "init-node"
@@ -60,6 +61,7 @@ def build_parser():
     p.add_argument("--max-packet", type=int, default=DEFAULT_MAX_PACKET)
     p.add_argument("--log-file", help="Path to the log file")
     p.add_argument("--log-level", default="ERROR", help="Log level (INFO, DEBUG, WARNING, ERROR)")
+    p.add_argument('--untrusted', action='store_true', help='Allow untrusted certificates')
 
     return p
 
@@ -80,3 +82,6 @@ def validate_runtime_args(args):
     if not (512 <= args.max_packet <= 65000):
         raise SystemExit("--max-packet must be between 512 and 65000")
 
+def setup_globals(args):
+    global UNTRUSTED
+    UNTRUSTED = args.untrusted
