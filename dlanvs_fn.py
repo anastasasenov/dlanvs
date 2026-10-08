@@ -94,7 +94,8 @@ def certificate_name(cert: x509.Certificate) -> str:
     try:
         vals = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
         return vals[0].value if vals else "unknown"
-    except Exception:
+    except Exception as exc:
+        logging.warning("certificate_name: " + str(exc))
         return "unknown"
 
 
@@ -123,7 +124,8 @@ def verify(cert: x509.Certificate, signature: bytes, data: bytes) -> bool:
     try:
         cert.public_key().verify(signature, data)
         return True
-    except Exception:
+    except Exception as exc:
+        logging.warning("verify: " + str(exc))
         return False
 
 
@@ -137,12 +139,14 @@ def verify_cert_signed_by(cert: x509.Certificate, ca: x509.Certificate) -> bool:
             cert.signature_hash_algorithm,
         )
         return True
-    except Exception:
+    except Exception as exc:
+        logging.warning("verify_cert_signed_by: " + str(exc))
         # Ed25519 certificates have no signature_hash_algorithm.
         try:
             ca.public_key().verify(cert.signature, cert.tbs_certificate_bytes)
             return True
-        except Exception:
+        except Exception as e:
+            logging.warning("verify_cert_signed_by: " + str(e))
             return False
 
 
@@ -161,7 +165,8 @@ def valid_certificate(cert: x509.Certificate, ca: x509.Certificate) -> bool:
             and cert.subject != ca.subject
             and verify_cert_signed_by(cert, ca)
         )
-    except Exception:
+    except Exception as exc:
+        logging.warning("valid_certificate: " + str(exc))
         return False
     
 def generate_ca(out_cert: str, out_key: str, common_name="DLANVS Root CA"):
