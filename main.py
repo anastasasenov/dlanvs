@@ -33,6 +33,7 @@ def main():
         return
 
     cfg.validate_runtime_args(args)
+    cfg.setup_globals(args)
 
     if not Path(args.cert).exists():
         raise SystemExit(f"Certificate not found: {args.cert}")
