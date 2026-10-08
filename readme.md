@@ -7,6 +7,23 @@ This is an experimenta voting system written in Python. The system operates enti
 
     UI (Terminal/Tkinter) - Voting Module - Crypto Module - Network Module (ipv4/6)
 
+    Each participant maintains an independent local replica of the voting state.
+
+    The system uses:
+        UDP broadcast/multicast for transport
+        X.509 certificates for authenticated participant identity
+        digital signatures for message integrity and authenticity
+        authenticated encryption for confidential payloads
+        deterministic event processing
+        immutable participant snapshots for voting eligibility
+        event identifiers and sequence numbers for replay/duplicate protection
+        periodic state synchronization and state hashes for recovery from packet loss
+        SQLite for persistent local state
+        Tkinter GUI and CLI interfaces
+
+    The protocol is designed so that:
+        Any two honest nodes processing the same set of valid protocol events reach the same deterministic voting state, regardless of the order in which those events were received.
+
 ### Prerequisites
 
 $ pip install cryptography 
