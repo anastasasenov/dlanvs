@@ -1,11 +1,16 @@
 ## Decentralized Local Network Voting System
 ![AI Assisted](https://shields.io)
 
-This is an experimenta voting system written in Python. The system operates entirely within a Local Area Network (LAN) without a central server.
+This is an experimental voting system written in Python. The system operates entirely within a Local Area Network (LAN) without a central server.
 
 ### Architecture
 
     UI (Terminal/Tkinter) - Voting Module - Crypto Module - Network Module (ipv4/6)
+
+    The architecture avoids a full-mesh P2P connection topology and therefore
+    maintains constant connection-management overhead per node.
+    Actual network scalability is dependent on multicast/broadcast characteristics,
+    packet rate, cryptographic processing, network infrastructure, and participant count
 
     Each participant maintains an independent local replica of the voting state.
 
@@ -23,7 +28,8 @@ This is an experimenta voting system written in Python. The system operates enti
 
     The protocol is designed so that:
         Any two honest nodes processing the same set of valid protocol events reach 
-        the same deterministic voting state, regardless of the order in which those events were received.
+        the same deterministic voting state, regardless of the order in which
+        those events were received.
 
 ### Prerequisites
 
