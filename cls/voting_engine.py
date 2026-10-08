@@ -3,6 +3,7 @@
 import uuid
 import math
 import threading
+import logging
 from typing import Any, Optional
 from cryptography import x509
 from cls.store_db import Database
@@ -306,6 +307,7 @@ class VotingEngine:
             e = self.make_event("TOPIC_CREATED", payload)
             ok, reason = self.accept_event(e)
             if not ok:
+                logging.error("create_topic: " + reason)
                 raise RuntimeError(reason)
             return e
 
@@ -329,6 +331,7 @@ class VotingEngine:
             })
             ok, reason = self.accept_event(e)
             if not ok:
+                logging.error("cast_vote: " + reason)
                 raise RuntimeError(reason)
             return e
 
