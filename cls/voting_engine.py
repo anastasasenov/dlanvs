@@ -228,7 +228,7 @@ class VotingEngine:
 
         if typ == "HELLO":
             try:
-                cert = x509.load_der_x509_certificate(b64d(e["certificate"]))
+                cert = x509.load_der_x509_certificate(fn.b64d(e["certificate"]))
                 participant = Participant(
                     e["sender_id"],
                     certificate_name(cert),
@@ -240,7 +240,8 @@ class VotingEngine:
                 self.participants[e["sender_id"]] = participant
                 if persist:
                     self.db.upsert_participant(participant)
-            except Exception:
+            except Exception as exc:
+                logging.warning("_apply: " + str(exc))
                 return
 
         elif typ == "TOPIC_CREATED":
