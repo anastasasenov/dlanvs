@@ -138,7 +138,6 @@ class Network:
             plaintext = self.crypto.decrypt(
                 fn.b64d(w["nonce"]), fn.b64d(w["ciphertext"]), aad
             )
-            logging.debug("_unpack: decrypted plaintext: "+str(plaintext))
             event["payload"] = json.loads(plaintext.decode("utf-8"))
             return event
         except Exception as exc:
@@ -188,9 +187,8 @@ class Network:
                     f"{event['event_id'][:8]} from {event['sender_id'][:8]}"
                     f" event: {str(event)}"
                 )
-            elif reason not in ("duplicate event",):
-                # Invalid packets are deliberately not printed verbosely.
-                pass
+            else:
+                logging.warning("_receiver: " + reason + " event: " + str(event))
 
     def _handle_control(self, event: dict[str, Any]):
         typ = event["event_type"]
