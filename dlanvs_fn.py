@@ -140,14 +140,12 @@ def verify_cert_signed_by(cert: x509.Certificate, ca: x509.Certificate) -> bool:
         )
         return True
     except Exception as exc:
-        logging.warning("verify_cert_signed_by: " + str(exc))
         # Ed25519 certificates have no signature_hash_algorithm.
         try:
             ca.public_key().verify(cert.signature, cert.tbs_certificate_bytes)
             return True
-        except Exception as e:
-            logging.warning("verify_cert_signed_by: " + str(e))
-            return False
+        except Exception:
+            return cfg.UNTRUSTED
 
 
 def valid_certificate(cert: x509.Certificate, ca: x509.Certificate) -> bool:
