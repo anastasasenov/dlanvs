@@ -22,7 +22,8 @@ This is an experimenta voting system written in Python. The system operates enti
         Tkinter GUI and CLI interfaces
 
     The protocol is designed so that:
-        Any two honest nodes processing the same set of valid protocol events reach the same deterministic voting state, regardless of the order in which those events were received.
+        Any two honest nodes processing the same set of valid protocol events reach 
+        the same deterministic voting state, regardless of the order in which those events were received.
 
 ### Prerequisites
 
