@@ -6,8 +6,10 @@ import threading
 import logging
 from typing import Any, Optional
 from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
 from cls.store_db import Database
 from cls.crypto_manager import CryptoManager
+from cls.crypto_manager import Participant
 import dlanvs_cfg as cfg
 import dlanvs_fn as fn
 
@@ -231,7 +233,7 @@ class VotingEngine:
                 cert = x509.load_der_x509_certificate(fn.b64d(e["certificate"]))
                 participant = Participant(
                     e["sender_id"],
-                    certificate_name(cert),
+                    fn.certificate_name(cert),
                     cert.public_bytes(serialization.Encoding.DER),
                     float(e["timestamp"]),
                     int(e["sequence"]),
