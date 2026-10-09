@@ -70,12 +70,27 @@ The script utilizes argparse for flexible CLI configuration:
     $ python3 ./dlanvs init-node --name ivo --ca ca.crt --ca-key ca.key
     $ python3 ./dlanvs --ip ipv4 --transport multicast --cert ivo.crt --key ivo.key --ca ca.crt
 
+    dlanvs> help
+
+    Documented commands (type help <topic>):
+    ========================================
+    create  exit  help  participants  quit  result  status  sync  topics  vote
+
+### LAN example with trusted certificates
+
+    LAN <-> Iva $ python3 ./dlanvs --ip ipv4 --transport multicast --cert iva.crt --key iva.key --ca ca.crt --group-key secret.key
+    LAN <-> Ana $ python3 ./dlanvs --ip ipv4 --transport multicast --cert ana.crt --key ana.key --ca ca.crt --group-key secret.key
+    LAN <-> Ivo $ python3 ./dlanvs --ip ipv4 --transport multicast --cert ivo.crt --key ivo.key --ca ca.crt --group-key secret.key
+
+    (*) The group-key will be provisioned securely out-of-band.
+
 ### Notes
 
 Since this project is experimental, multiple options can be trialed.
 
     extend voting system on WAN
     improve security / blockchain impl
+    provision the group key securely
     improve performance
     add discussion topics
     add private messages
